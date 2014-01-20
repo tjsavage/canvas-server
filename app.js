@@ -5,9 +5,17 @@
 
 var express = require('express');
 var routes = require('./routes');
-var user = require('./routes/user');
 var http = require('http');
 var path = require('path');
+var argv = require('optimist')
+			.usage('Usage: $0 [config file]')
+			.argv;
+if (argv._[0]) {
+	var config = require(argv._[0]);
+} else {
+	console.log("no config specified");
+}
+
 
 var app = express();
 
@@ -28,9 +36,30 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-app.get('/', routes.index);
-app.get('/users', user.list);
-
-http.createServer(app).listen(app.get('port'), function(){
+var server = http.createServer(app);
+server.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
+
+var io = require('socket.io').listen(server);
+
+io.sockets.on('connection', function(socket) {
+	socket.on('state', function(data) {
+		socket.broadcast.emit('state', data);
+	});
+
+	socket.on('event', function(data) {
+		console.log("broadcasting event", data);
+		socket.broadcast.emit('event', data);
+	});
+
+	socket.on('action', function(data) {
+		console.log("broadcasting action",data);
+		socket.broadcast.emit('action', data);
+	});
+
+	socket.on('update', function(data) {
+		socket.broadcast.emit('update', data);
+	});
+});
+
