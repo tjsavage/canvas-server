@@ -7,20 +7,13 @@ var express = require('express');
 var routes = require('./routes');
 var http = require('http');
 var path = require('path');
-var argv = require('optimist')
-			.usage('Usage: $0 [config file]')
-			.argv;
-if (argv._[0]) {
-	var config = require(argv._[0]);
-} else {
-	console.log("no config specified");
-}
+
 
 
 var app = express();
 
 // all environments
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || 3030);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.use(express.favicon());
